@@ -13,7 +13,6 @@ export default function Header() {
           width={140}
           height={60}
           className="p-4"
-          onClick={() => {}}
         />
 
         <h1 className="text-xl ">HỒ SƠ LÔ</h1>
