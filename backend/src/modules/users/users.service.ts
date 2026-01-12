@@ -1,42 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { Users } from 'src/entities/users.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { compareSync, hash } from 'bcrypt';
+import { PrismaService } from 'src/prisma.service';
 @Injectable()
 export class UsersService {
-    constructor(@InjectRepository(Users) private usersRepository: Repository<Users>) { }
-    findAll(): Promise<Users[]> {
-        return this.usersRepository.find();
-    }
-    findById(id: number): Promise<Users | null> {
-        return this.usersRepository.findOne({ where: { id } });
-    }
+  constructor(private prisma: PrismaService) {}
 
-    findByUsername(username: string): Promise<Users | null> {
-        return this.usersRepository.findOne({ where: { username } });
-    }
+  async findAll() {
+    return this.prisma.users.findMany();
+  }
 
+  findById(id: number) {
+    return this.prisma.users.findUnique({ where: { id } });
+  }
 
-    async create(user: Users): Promise<Users> {
-        const newUser = this.usersRepository.create(user);
-        newUser.createdAt = new Date();
-        newUser.updatedAt = new Date();
-        newUser.password = await hash(user.password, 10);
-        return this.usersRepository.save(newUser);
-    }
-
-    async validateUser(username: string, password: string) {
-        const user = await this.usersRepository.findOne({ where: { username } })
-        if (!user) {
-            throw new Error('User not found')
-        }
-        const isMatch = await compareSync(password, user.password)
-        if (!isMatch) {
-            throw new Error('Invalid password')
-        }
-        return user
-
-    }
-
+  validateUser(email: string, password: string) {
+    return null;
+  }
 }
