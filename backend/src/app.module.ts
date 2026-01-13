@@ -5,9 +5,10 @@ import { UsersModule } from './modules/users/users.module';
 import { MiddlewareConsumer } from '@nestjs/common';
 import { AuthenticationMiddleware } from './middleware/authentication/authentication.middleware';
 import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({}), UsersModule],
+  imports: [ConfigModule.forRoot({}), UsersModule, AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })
