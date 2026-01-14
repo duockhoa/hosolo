@@ -25,4 +25,27 @@ export class AuthService {
       refreshToken,
     };
   }
+
+  async refreshToken(refreshTokenDto: any) {
+    const { refreshToken } = refreshTokenDto;
+    const storedToken = await this.prisma.tokens.findUnique({
+      where: { refreshToken },
+    });
+    if (!storedToken) {
+      return null;
+    }
+    let payload: any;
+    try {
+      payload = this.jwtService.verify(refreshToken);
+    } catch (e) {
+      return null;
+    }
+    const newAccessToken = this.jwtService.sign({
+      username: payload.username,
+      sub: payload.sub,
+    });
+    return {
+      accessToken: newAccessToken,
+    };
+  }
 }

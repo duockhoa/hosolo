@@ -23,10 +23,26 @@ export class AuthController {
     return newUser;
   }
 
+  @Post('refresh-token')
+  async refreshToken(@Body() refreshToken: { refreshToken: string }) {
+    if (!refreshToken || !refreshToken.refreshToken) {
+      throw new HttpException('Refresh token is required', 400);
+    }
+    const newToken = await this.authService.refreshToken(refreshToken);
+    if (!newToken) {
+      throw new HttpException('Invalid refresh token', 401);
+    }
+    return newToken;
+  }
+
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() request) {
     const token = await this.authService.login(request.user);
+    if (!token) {
+      throw new HttpException('Invalid credentials', 401);
+    }
+
     return token;
   }
 }
