@@ -14,6 +14,10 @@ import { ValidationPipe } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UseGuards } from '@nestjs/common';
 import { jwtAuthGuard } from 'src/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { PermissionsGuard } from 'src/guards/permissions.guard';
+import { Roles } from 'src/decorators/roles.decorator';
+import { Permissions } from 'src/decorators/permissions.decorator';
 
 @Controller('users')
 @UsePipes(
@@ -28,7 +32,7 @@ export class UsersController {
   findAll() {
     return this.usersService.findAll();
   }
-  @UseGuards(jwtAuthGuard)
+
   @Get(':id')
   async findById(@Param('id') id: number) {
     const user = await this.usersService.findById(id);
@@ -37,6 +41,8 @@ export class UsersController {
     }
     return user;
   }
+  @UseGuards(jwtAuthGuard, RolesGuard)
+  @Roles('admin')
   @Post()
   async createUser(@Body() createUserDto: CreateUserDto) {
     const user = await this.usersService.createUser(createUserDto);
@@ -49,6 +55,8 @@ export class UsersController {
     return user;
   }
 
+  @UseGuards(jwtAuthGuard, PermissionsGuard)
+  @Permissions('USER_DELETE')
   @Delete(':id')
   async deleteUser(@Param('id') id: number) {
     const user = await this.usersService.deleteUser(id);

@@ -13,6 +13,15 @@ export class UsersService {
   findById(id: number) {
     return this.prisma.users.findUnique({
       where: { id },
+      include: {
+        userRoles: {
+          include: {
+            roles: {
+              include: { rolePermissions: { include: { permissions: true } } },
+            },
+          },
+        },
+      },
     });
   }
 
@@ -60,7 +69,18 @@ export class UsersService {
   }
 
   async validateUser(username: string, password: string) {
-    const user = await this.prisma.users.findUnique({ where: { username } });
+    const user = await this.prisma.users.findUnique({
+      where: { username },
+      include: {
+        userRoles: {
+          include: {
+            roles: {
+              include: { rolePermissions: { include: { permissions: true } } },
+            },
+          },
+        },
+      },
+    });
     if (user && compareSync(password, user.password)) {
       return user;
     }
