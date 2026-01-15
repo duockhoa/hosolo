@@ -10,7 +10,7 @@ import { useLogout } from "@/hooks/use-logout";
 import { LogOut, User, Settings, LayoutGrid } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-export default function UserCard({ user }: { user: object }) {
+export default function UserCard({ user }: { user: any }) {
   const { logout } = useLogout();
   const router = useRouter();
   return (
@@ -19,11 +19,16 @@ export default function UserCard({ user }: { user: object }) {
         <DropdownMenuTrigger asChild>
           <div className="flex items-center gap-2">
             <div className="flex flex-col">
-              <span className="font-bold">Phạm Văn Bình</span>
-              <span className="text-gray-500 text-xs">NV ĐBCL</span>
+              <span className="font-bold">{user?.name}</span>
+              <span className="text-gray-500 text-xs">
+                {user?.position} {user?.department}
+              </span>
             </div>
-            <Avatar className="size-9">
-              <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+            <Avatar>
+              <AvatarImage
+                src={user?.avatar || "https://github.com/shadcn.png"}
+                alt={user?.name || "@shadcn"}
+              />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
           </div>

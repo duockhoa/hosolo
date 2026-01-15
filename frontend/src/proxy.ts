@@ -34,28 +34,12 @@ export default async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (isLoggedIn && protectedPaths.includes(pathname) && backendBaseUrl) {
-    try {
-      const verifyResponse = await fetch(`${backendBaseUrl}/users/me`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      if (verifyResponse.status === 401) {
-        const refreshResponse = await refreshAccessToken(
-          request,
-          refreshToken
-        );
-        if (refreshResponse) {
-          return refreshResponse;
-        }
-        const response = NextResponse.redirect(new URL("/login", request.url));
-        response.cookies.delete("accessToken");
-        response.cookies.delete("refreshToken");
-        return response;
+  if (isLoggedIn && protectedPaths.includes(pathname)) {
+    if (shouldRefreshAccessTokenAfterExpiry(accessToken, 60) && hasRefreshToken) {
+      const refreshResponse = await refreshAccessToken(request, refreshToken);
+      if (refreshResponse) {
+        return refreshResponse;
       }
-    } catch {
-      return NextResponse.redirect(new URL("/login", request.url));
     }
   }
 
@@ -117,6 +101,17 @@ const getAccessTokenMaxAge = (token: string, fallbackSeconds: number) => {
   } catch {
     return fallbackSeconds;
   }
+};
+
+const shouldRefreshAccessTokenAfterExpiry = (
+  token: string | undefined,
+  graceSecondsAfterExpiry: number
+) => {
+  if (!token) {
+    return false;
+  }
+  const maxAge = getAccessTokenMaxAge(token, 0);
+  return maxAge <= 0 && maxAge >= -graceSecondsAfterExpiry;
 };
 
 const decodeBase64Url = (value: string) => {

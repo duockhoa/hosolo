@@ -25,6 +25,7 @@ model Users {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   tokens     Tokens[]
+  userRoles  UserRoles[]
   @@map("users")
 }
 
@@ -40,3 +41,57 @@ model Tokens {
 
   @@map("tokens")
 }
+
+
+model Roles{
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  description String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  userRoles  UserRoles[]
+  rolePermissions RolePermissions[]
+
+  @@map("roles")
+}
+
+model UserRoles {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  role_id    Int
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  users      Users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  roles      Roles    @relation(fields: [role_id], references: [id], onDelete: Cascade)
+
+  @@map("user_roles")
+}
+
+
+model Permissions {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  description String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  rolePermissions RolePermissions[]
+
+
+  @@map("permissions")
+}
+
+model RolePermissions {
+  id            Int      @id @default(autoincrement())
+  role_id       Int
+  permission_id Int
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  roles         Roles       @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  permissions   Permissions @relation(fields: [permission_id], references: [id], onDelete: Cascade)
+
+  @@map("role_permissions")
+}
+
+
